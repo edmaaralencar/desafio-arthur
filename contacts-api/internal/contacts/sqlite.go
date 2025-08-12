@@ -62,3 +62,16 @@ func (s *sqliteStore) ListPaginated(ctx context.Context, page, perPage int) ([]C
 
 	return list, total, nil
 }
+
+func (s *sqliteStore) Create(ctx context.Context, contact *CreateContactRequest) (error) {
+	_, err := s.db.ExecContext(ctx, 
+		"INSERT INTO contacts(name, email, cpf_cnpj, phone) VALUES (?, ?, ?, ?)",
+		contact.Name, contact.Email, contact.CpfCnpj, contact.Phone,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

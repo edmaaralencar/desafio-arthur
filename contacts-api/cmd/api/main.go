@@ -25,6 +25,7 @@ func main() {
   app := fiber.New()
 
   app.Get("/contacts", contacts.ListContacts(store))
+  app.Post("/contacts", contacts.CreateContact(store))
 
   log.Fatal(app.Listen(":3000"))
 }

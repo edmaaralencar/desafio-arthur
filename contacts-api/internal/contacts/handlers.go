@@ -1,6 +1,8 @@
 package contacts
 
 import (
+	"encoding/json"
+
 	"github.com/edmaaralencar/contacts-api/internal/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -33,5 +35,40 @@ func ListContacts(store Store) fiber.Handler {
 		}
 
 		return c.JSON(response)
+	}
+}
+
+type CreateContactRequest struct {
+	Name  string `json:"name" validate:"required,min=3"`
+	Email string `json:"email" validate:"required,email"`
+	Phone string `json:"phone" validate:"required"`
+	CpfCnpj string `json:"cpfCnpj" validate:"required"`
+}
+
+func CreateContact(store Store) fiber.Handler {
+	return func (c *fiber.Ctx) error {
+		var body CreateContactRequest
+
+		if err := json.Unmarshal(c.Body(), &body); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid json")
+		}
+
+		if errors := utils.ValidateStruct(body); errors != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"errors": errors,
+			})
+		}
+
+		isValid, cleanedDoc := utils.ValidateCpfCnpj(body.CpfCnpj)
+
+		if !isValid {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid CPF or CNPJ"})
+		}
+
+		body.CpfCnpj = cleanedDoc
+
+		store.Create(c.Context(), &body)
+		
+		return nil
 	}
 }

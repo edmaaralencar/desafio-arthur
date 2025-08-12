@@ -18,4 +18,5 @@ type Contact struct {
 type Store interface {
 	List(ctx context.Context) ([]Contact, error)
 	ListPaginated(ctx context.Context, page, perPage int) ([]Contact, int, error)
+	Create(ctx context.Context, contact *CreateContactRequest) (error)
 }
