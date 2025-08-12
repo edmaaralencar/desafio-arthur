@@ -12,9 +12,9 @@ func SeedContacts(db *sql.DB) error {
 		CpfCnpj string
 		Phone   string
 	}{
-		{"Alice Silva", "alice@example.com", "123.456.789-00", "11999999999"},
-		{"Bruno Souza", "bruno@example.com", "987.654.321-00", "11888888888"},
-		{"Carla Lima", "carla@example.com", "111.222.333-44", "11777777777"},
+		{"Alice Silva", "alice@example.com", "12345678900", "11999999999"},
+		{"Bruno Souza", "bruno@example.com", "56379482000197", "11888888888"},
+		{"Carla Lima", "carla@example.com", "11122233344", "11777777777"},
 	}
 
 	stmt, err := db.Prepare("INSERT OR IGNORE INTO contacts(name, email, cpf_cnpj, phone) VALUES (?, ?, ?, ?)")
