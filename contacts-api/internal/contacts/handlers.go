@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	apiError "github.com/edmaaralencar/contacts-api/internal/api-error"
 	"github.com/edmaaralencar/contacts-api/internal/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -33,7 +34,7 @@ func ListContacts(store Store) fiber.Handler {
 		contacts, total, err := store.ListPaginated(c.Context(), page, perPage)
 
 		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Database error"})
 		}
 
 		if contacts == nil {
@@ -82,19 +83,27 @@ func CreateContact(store Store) fiber.Handler {
 		var body CreateContactRequest
 
 		if err := json.Unmarshal(c.Body(), &body); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid JSON"})
+			return apiError.NewAPIError(fiber.StatusBadRequest, "Invalid JSON")
 		}
 
 		if errors := utils.ValidateStruct(body); errors != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"errors": errors,
-			})
+			return apiError.SendAPIError(c, fiber.StatusBadRequest, "Validation failed", errors)
 		}
 
 		isValid, cleanedDoc := utils.ValidateCpfCnpj(body.CpfCnpj)
 
 		if !isValid {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid CPF or CNPJ"})
+			return apiError.NewAPIError(fiber.StatusBadRequest, "Invalid CPF or CNPJ")
+		}
+
+		exists, err := store.FindByCpfOrCnpj(c.Context(), body.CpfCnpj)
+
+		if err != nil {
+			return apiError.NewAPIError(fiber.StatusBadRequest, "Database error")
+		}
+
+		if exists {
+			return apiError.NewAPIError(fiber.StatusBadRequest, "CPF/CNPJ already exists")
 		}
 
 		body.CpfCnpj = cleanedDoc
@@ -121,15 +130,15 @@ func DeleteContact(store Store) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id, err := c.ParamsInt("id")
 		if err != nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Invalid ID"})
+			return apiError.NewAPIError(fiber.StatusBadRequest, "Invalid ID")
 		}
 
 		if err := store.Delete(c.Context(), int64(id)); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Contact not found"})
+				return apiError.NewAPIError(fiber.StatusNotFound, "Contact not found")
 			}
 
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			return apiError.NewAPIError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return c.SendStatus(fiber.StatusNoContent)

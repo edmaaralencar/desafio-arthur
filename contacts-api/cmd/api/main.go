@@ -4,6 +4,7 @@ import (
 	"log"
 
 	_ "github.com/edmaaralencar/contacts-api/docs"
+	apiError "github.com/edmaaralencar/contacts-api/internal/api-error"
 	"github.com/edmaaralencar/contacts-api/internal/contacts"
 	"github.com/edmaaralencar/contacts-api/internal/database"
 	"github.com/gofiber/fiber/v2"
@@ -29,7 +30,27 @@ func main() {
 
   store := contacts.NewSQLiteStore(db)
 
-  app := fiber.New()
+  app := fiber.New(fiber.Config{
+    ErrorHandler: func(c *fiber.Ctx, err error) error {
+      var apiErr *apiError.APIError
+
+      if ok := apiError.AsAPIError(err, &apiErr); ok {
+        return c.Status(apiErr.Code).JSON(apiErr)
+      }
+
+      if fe, ok := err.(*fiber.Error); ok {
+        return c.Status(fe.Code).JSON(&apiError.APIError{
+          Code:    fe.Code,
+          Message: fe.Message,
+        })
+      }
+
+      return c.Status(fiber.StatusInternalServerError).JSON(&apiError.APIError{
+        Code:    fiber.StatusInternalServerError,
+        Message: "Internal server error",
+      })
+    },
+  })
 
 	app.Get("/docs/*", swagger.HandlerDefault)
 

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -27,25 +26,14 @@ func ValidateStruct(s interface{}) map[string]string {
 func getErrorMessage(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
-		return "Este campo é obrigatório"
+		return "Required field"
 	case "email":
-		return "Formato de e-mail inválido"
+		return "Invalid e-mail"
 	case "min":
-		return fmt.Sprintf("Deve ter no mínimo %s caracteres", fe.Param())
+		return fmt.Sprintf("Min %s characters", fe.Param())
 	case "max":
-		return fmt.Sprintf("Deve ter no máximo %s caracteres", fe.Param())
+		return fmt.Sprintf("Max %s characters", fe.Param())
 	default:
-		return fmt.Sprintf("Falha na validação: %s", fe.Tag())
+		return fmt.Sprintf("Fail at validation: %s", fe.Tag())
 	}
-}
-
-func toSnakeCase(str string) string {
-	var result []rune
-	for i, r := range str {
-		if i > 0 && r >= 'A' && r <= 'Z' {
-			result = append(result, '_')
-		}
-		result = append(result, r)
-	}
-	return strings.ToLower(string(result))
 }

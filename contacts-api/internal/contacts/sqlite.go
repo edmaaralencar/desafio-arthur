@@ -86,3 +86,10 @@ func (s *sqliteStore) Delete(ctx context.Context, id int64) error {
 	}
 	return nil
 }
+
+func (s *sqliteStore) FindByCpfOrCnpj(ctx context.Context, cpfCnpj string) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM contacts WHERE cpf_cnpj = ? LIMIT 1)`
+	err := s.db.QueryRowContext(ctx, query, cpfCnpj).Scan(&exists)
+	return exists, err
+}
