@@ -9,10 +9,10 @@ type Contact struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
-	CpfCnpj  string `json:"cpf_cnpj"`
+	CpfCnpj  string `json:"cpfCnpj"`
 	Phone    string `json:"phone"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type Store interface {
