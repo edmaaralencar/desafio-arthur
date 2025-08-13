@@ -19,4 +19,5 @@ type Store interface {
 	List(ctx context.Context) ([]Contact, error)
 	ListPaginated(ctx context.Context, page, perPage int) ([]Contact, int, error)
 	Create(ctx context.Context, contact *CreateContactRequest) (error)
+	Delete(ctx context.Context, id int64) (error)
 }

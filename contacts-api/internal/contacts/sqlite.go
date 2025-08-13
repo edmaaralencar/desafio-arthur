@@ -75,3 +75,14 @@ func (s *sqliteStore) Create(ctx context.Context, contact *CreateContactRequest)
 
 	return nil
 }
+
+func (s *sqliteStore) Delete(ctx context.Context, id int64) error {
+	res, err := s.db.ExecContext(ctx, "DELETE FROM contacts WHERE id = ?", id)
+	if err != nil {
+			return err
+	}
+	if count, _ := res.RowsAffected(); count == 0 {
+			return sql.ErrNoRows
+	}
+	return nil
+}

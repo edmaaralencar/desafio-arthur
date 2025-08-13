@@ -10,9 +10,9 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-// @title Fiber Example API
+// @title Contacts API
 // @version 1.0
-// @description This is a sample swagger for Fiber
+// @description Contacts API built with Go
 // @host localhost:8080
 // @BasePath /
 func main() {
@@ -35,6 +35,7 @@ func main() {
 
   app.Get("/contacts", contacts.ListContacts(store))
   app.Post("/contacts", contacts.CreateContact(store))
+  app.Delete("/contacts/:id", contacts.DeleteContact(store))
 
   log.Fatal(app.Listen(":8080"))
 }

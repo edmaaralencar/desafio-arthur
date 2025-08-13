@@ -1,7 +1,9 @@
 package contacts
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 
 	"github.com/edmaaralencar/contacts-api/internal/utils"
 	"github.com/gofiber/fiber/v2"
@@ -25,7 +27,7 @@ type ListContactsResponse struct {
 // @Router       /contacts [get]
 func ListContacts(store Store) fiber.Handler {
 	return func (c *fiber.Ctx) error {
-		page := c.QueryInt("page", 2)
+		page := c.QueryInt("page", 1)
 		perPage := c.QueryInt("per_page", 10)
 
 		contacts, total, err := store.ListPaginated(c.Context(), page, perPage)
@@ -100,5 +102,36 @@ func CreateContact(store Store) fiber.Handler {
 		store.Create(c.Context(), &body)
 		
 		return c.SendStatus(fiber.StatusCreated)
+	}
+}
+
+// DeleteHandler godoc
+// @Summary      Delete a contact
+// @Description  Deletes a contact by ID
+// @Tags         Contacts
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Contact ID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  APIError
+// @Failure      404  {object}  APIError
+// @Failure      500  {object}  APIError
+// @Router       /contacts/{id} [delete]
+func DeleteContact(store Store) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id, err := c.ParamsInt("id")
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Invalid ID"})
+		}
+
+		if err := store.Delete(c.Context(), int64(id)); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Contact not found"})
+			}
+
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		return c.SendStatus(fiber.StatusNoContent)
 	}
 }

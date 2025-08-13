@@ -55,8 +55,8 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample swagger for Fiber
-  title: Fiber Example API
+  description: Contacts API built with Go
+  title: Contacts API
   version: "1.0"
 paths:
   /contacts:
@@ -105,6 +105,37 @@ paths:
           schema:
             $ref: '#/definitions/contacts.APIError'
       summary: Create a new contact
+      tags:
+      - Contacts
+  /contacts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a contact by ID
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/contacts.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/contacts.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/contacts.APIError'
+      summary: Delete a contact
       tags:
       - Contacts
 swagger: "2.0"
