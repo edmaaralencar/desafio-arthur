@@ -3,11 +3,18 @@ package main
 import (
 	"log"
 
+	_ "github.com/edmaaralencar/contacts-api/docs"
 	"github.com/edmaaralencar/contacts-api/internal/contacts"
 	"github.com/edmaaralencar/contacts-api/internal/database"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
+// @title Fiber Example API
+// @version 1.0
+// @description This is a sample swagger for Fiber
+// @host localhost:8080
+// @BasePath /
 func main() {
   db, err := database.ConnectAndMigrate()
   if err != nil {
@@ -24,8 +31,10 @@ func main() {
 
   app := fiber.New()
 
+	app.Get("/docs/*", swagger.HandlerDefault)
+
   app.Get("/contacts", contacts.ListContacts(store))
   app.Post("/contacts", contacts.CreateContact(store))
 
-  log.Fatal(app.Listen(":3000"))
+  log.Fatal(app.Listen(":8080"))
 }
