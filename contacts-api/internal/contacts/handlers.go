@@ -34,7 +34,7 @@ func ListContacts(store Store) fiber.Handler {
 		contacts, total, err := store.ListPaginated(c.Context(), page, perPage)
 
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Database error"})
+			return apiError.NewAPIError(fiber.StatusBadRequest, "Database error")
 		}
 
 		if contacts == nil {
